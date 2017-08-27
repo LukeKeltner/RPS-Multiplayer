@@ -26,9 +26,15 @@ input
 {
 	height:200px;
 	border: 3px solid #eee;
+	display:none;
 }
 
 #outcome
 {
 	background-color: lightblue;
+}
+
+#chat
+{
+	display: none;
 }

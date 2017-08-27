@@ -15,7 +15,7 @@
 		</div>
 
 		<!-- Player picks name -->
-		<div class="row">
+		<div class="row" id="pick-name">
 
 			<div class="col-md-3 text-center">
 			</div>
@@ -28,7 +28,7 @@
 				<input placeholder="Pick a name!" id="name"></input>
 			</div>
 
-			<div class="col-md-13 text-center">
+			<div class="col-md-3 text-center">
 			</div>
 
 		</div>
@@ -38,7 +38,7 @@
 
 			<div class="col-md-4 text-center">
 				<div class="player-window" id="1-window">
-					<h3>Player 1</h3>
+					<h3 id="player1-name">Doop</h3>
 				</div>
 			</div>
 
@@ -50,32 +50,35 @@
 
 			<div class="col-md-4 text-center">
 				<div class="player-window" id="2-window">
-					<h3>Player 2</h3>
+					<h3 id="player2-name">Hihihi</h3>
 				</div>
 			</div>
 
 		</div>
 
 		<!-- Chat window -->
-		<div class="row">
 
-			<div class="col-md-12">
-				<div id="chat-window" class="pre-scrollable"></div>
+		<div id="chat">
+			<div class="row">
+
+				<div class="col-md-12">
+					<div id="chat-window" class="pre-scrollable"></div>
+				</div>
+
 			</div>
 
-		</div>
+			<!-- User input for chat -->
+			<div class="row">
 
-		<!-- User input for chat -->
-		<div class="row">
+				<div class="col-md-1 text-center">
+					<button  id="send-chat">Send</button>
+				</div>
 
-			<div class="col-md-1 text-center">
-				<button  id="send-chat">Send</button>
+				<div class="col-md-11">
+					<input placeholder="Say something!" id="message"></input>
+				</div>
+
 			</div>
-
-			<div class="col-md-11">
-				<input placeholder="Say something!" id="message"></input>
-			</div>
-
 		</div>
 
 	</div>

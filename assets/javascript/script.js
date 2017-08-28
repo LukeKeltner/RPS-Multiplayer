@@ -23,6 +23,12 @@ var players = database.ref('players');
 var player1DB = database.ref('players/1')
 var player2DB = database.ref('players/2')
 
+var createMessage = function()
+{
+	var message = playerName+": "+$('#message').val().trim()
+	database.ref('chat').child(numberOfChats).set(message)
+}
+
 connectedRef.on("value", function(snap) 
 {
 	console.log("console log of connections snap: "+snap)
@@ -205,14 +211,6 @@ database.ref('chat').on('value', function(snapshot)
 	}
 
 })
-
-
-var createMessage = function()
-{
-	var message = playerName+": "+$('#message').val().trim()
-	database.ref('chat').child(numberOfChats).set(message)
-}
-
 
 $('#create-player').on('click', function(event)
 {

@@ -18,6 +18,7 @@ var playerName = "";
 var connectionsRef = database.ref("/connections");
 var connectedRef = database.ref(".info/connected");
 var chats = database.ref('chat');
+var players = database.ref('players');
 
 connectedRef.on("value", function(snap) 
 {
@@ -39,9 +40,23 @@ chats.on('value', function(snap)
 	numberOfChats = snap.numChildren();
 })
 
+players.on('value', function(snap)
+{
+	if (snap.numChildren() == 2)
+	{
+		$('#pick-name').hide();
+		var player1Name = snap.val()[1].name;
+		var player2Name = snap.val()[2].name;
+		$('#player1-name').html(player1Name);
+		$('#player2-name').html(player2Name);
 
-var player1Name = 'Player 1'
-var player2Name = 'Player 2'
+		console.log(snap.val()[1].pick===undefined)
+
+		console.log("Player 1 picked - "+snap.val()[1].pick)
+	}
+})
+
+
 var player1LoggedIn = false;
 var player2LoggedIn = false;
 var playerNumber = 0;
@@ -60,7 +75,6 @@ database.ref('numOfPlayers').once('value', function(snapshot)
 
 database.ref('chat').on('value', function(snapshot)
 {
-	console.log("-------------------------")
 	$('#chat-window').empty()
 
 	for (var i=0; i<numberOfChats; i++)
@@ -74,91 +88,14 @@ database.ref('chat').on('value', function(snapshot)
 	}
 
 })
-/*database.ref('/1').on('value', function(snapshot)
-{
 
-	if(snapshot.child('name').exists())
-	{
-		player1Name = snapshot.val().name
-		database.ref('1').set(
-		{
-			name: player1Name
-		})
-
-		$('#player1-name').html(player1Name)
-		$('#1-window').css("background-color", 'green')
-	}
-
-	else
-	{
-		$('#player1-name').html(player1Name)
-	}
-})
-
-database.ref('/2').on('value', function(snapshot)
-{
-
-	if(snapshot.child('name').exists())
-	{
-		player2Name = snapshot.val().name
-		database.ref('2').set(
-		{
-			name: player2Name
-		})
-
-		$('#player2-name').html(player2Name)
-	}
-
-	else
-	{
-		$('#player2-name').html(player2Name)
-	}
-})
-*/
 
 var createMessage = function()
 {
 	var message = playerName+": "+$('#message').val().trim()
-
 	database.ref('chat').child(numberOfChats).set(message)
-
-
-
-	// Write and then read back a string from the Database.
-/*	database.ref('chat').child(numberOfChats).set({message: message})
-	  .then(function() {
-	    return database.ref('chat').child(numberOfChats).once("value");
-	  })
-	  .then(function(snapshot) {
-	    var data = snapshot.val();
-	    console.log(data) // data === "hello"
-	  });*/
-/*	var p = $('<p>')
-	p.html(message)
-	$('#chat-window').append(p)
-	$('#message').val("")
-	$('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);*/
-
 }
 
-/*$('#create-player').on('click', function(event)
-{
-	var playerName = $('#name').val().trim()
-
-	if (!player1LoggedIn)
-	{
-		database.ref('/1').set(
-		{
-			name: playerName,
-			wins: 0,
-			losses: 0,
-			choice: ""
-		})
-
-		player1LoggedIn = true;
-	}
-
-})*/
 
 $('#create-player').on('click', function(event)
 {
@@ -173,12 +110,23 @@ $('#create-player').on('click', function(event)
 
 	$('#chat').show()
 	$('#pick-name').hide()
-	$('#'+playerNumber+'-window').show()
-	$('#player'+playerNumber+'-name').html(playerName)
 
-	if (playerNumber%2 ==0)
+	if (playerNumber%2 ==1)
 	{
-		console.log('You are player 2!')
+		$('#1-window').hide()
+		$('#choose-1').show()
+		$('#player'+playerNumber+'-name-choose').html(playerName)
+		$('#outcome').show()
+		$('#2-window').show()
+	}
+
+	else if(playerNumber%2 ==0)
+	{
+		$('#2-window').hide()
+		$('#choose-2').show()
+		$('#player'+playerNumber+'-name-choose').html(playerName)
+		$('#outcome').show()
+		$('#1-window').show()
 	}
 })
 
@@ -193,4 +141,12 @@ $('#message').keyup(function(event)
 	{
 		createMessage()
 	}
+})
+
+$('#rock1').on('click', function(event)
+{
+	players.child(1).update(
+	{
+		pick: 'rock'
+	})
 })

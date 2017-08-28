@@ -20,6 +20,8 @@ var connectionsRef = database.ref("/connections");
 var connectedRef = database.ref(".info/connected");
 var chats = database.ref('chat');
 var players = database.ref('players');
+var player1DB = database.ref('players/1')
+var player2DB = database.ref('players/2')
 
 connectedRef.on("value", function(snap) 
 {
@@ -32,6 +34,9 @@ connectedRef.on("value", function(snap)
 		console.log("Player "+playerNumber+" has disconnected")
 	}
 });
+
+player1DB.onDisconnect().remove();
+player2DB.onDisconnect().remove();
 
 connectionsRef.on("value", function(snap) 
 {
@@ -164,9 +169,11 @@ players.on('value', function(snap)
 	if (snap.val().numberOfConnections === 1)
 	{
 		console.log("Someone logged out!")
-/*		console.log("Player 1 is here: "+snap.hasChild('1'))
-		console.log("Player 2 is here: "+snap.hasChild('2'))*/
 		var whoIsIn = snap.val()
+		database.ref('players').once('value').then(function(snap)
+		{
+			console.log(snap.val())
+		});
 	}
 
 })
@@ -213,8 +220,8 @@ $('#create-player').on('click', function(event)
 
 	database.ref('players').once('value').then(function(snap)
 	{
-		console.log("1 exists: "+snap.hasChild('1'))//true is exists, false if not
-		console.log("2 exists: "+snap.hasChild('2'))//true is exists, false if not
+		console.log("1 exists: "+snap.hasChild('1'))//true if exists, false if not
+		console.log("2 exists: "+snap.hasChild('2'))//true if exists, false if not
 
 		if (!snap.hasChild('1'))
 		{
@@ -252,34 +259,6 @@ $('#create-player').on('click', function(event)
 			$('#1-window').show()
 		}
 	});
-
-/*	database.ref('players').child(playerNumber).set(
-	{
-		wins: 0,
-		losses: 0,
-		name: playerName
-	})
-
-	$('#chat').show()
-	$('#pick-name').hide()
-
-	if (playerNumber%2 ==1)
-	{
-		$('#1-window').hide()
-		$('#choose-1').show()
-		$('#player'+playerNumber+'-name-choose').html(playerName)
-		$('#outcome').show()
-		$('#2-window').show()
-	}
-
-	else if(playerNumber%2 ==0)
-	{
-		$('#2-window').hide()
-		$('#choose-2').show()
-		$('#player'+playerNumber+'-name-choose').html(playerName)
-		$('#outcome').show()
-		$('#1-window').show()
-	}*/
 })
 
 $('#send-chat').on('click', function(event)

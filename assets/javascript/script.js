@@ -47,10 +47,32 @@ players.on('value', function(snap)
 		$('#pick-name').hide();
 		var player1Name = snap.val()[1].name;
 		var player2Name = snap.val()[2].name;
+		var player1Pick = snap.val()[1].pick
+		var player2Pick = snap.val()[2].pick
 		$('#player1-name').html(player1Name);
 		$('#player2-name').html(player2Name);
 
-		console.log(snap.val()[1].pick===undefined)
+
+		if (snap.val()[1].pick!==undefined && snap.val()[2].pick!==undefined)
+		{
+			if ((player1Pick === 'rock' && player2Pick === 'scissors') || (player1Pick === 'paper' && player2Pick === 'rock') || (player1Pick === 'scissors' && player2Pick ==='paper'))
+			{
+				var totalWins = snap.val()[1].wins + 1;
+				var totalLosses = snap.val()[2].losses + 1;
+
+				players.child(1).update(
+				{
+					wins: totalWins,
+					pick: ''
+				})
+
+				players.child(2).update(
+				{
+					losses: totalLosses,
+					pick: ''
+				})
+			}
+		}
 
 		console.log("Player 1 picked - "+snap.val()[1].pick)
 	}
@@ -149,4 +171,44 @@ $('#rock1').on('click', function(event)
 	{
 		pick: 'rock'
 	})
+})
+
+$('#scissors1').on('click', function(event)
+{
+	players.child(1).update(
+	{
+		pick: 'scissors'
+	})	
+})
+
+$('#paper1').on('click', function(event)
+{
+	players.child(1).update(
+	{
+		pick: 'paper'
+	})	
+})
+
+$('#rock2').on('click', function(event)
+{
+	players.child(2).update(
+	{
+		pick: 'rock'
+	})
+})
+
+$('#scissors2').on('click', function(event)
+{
+	players.child(2).update(
+	{
+		pick: 'scissors'
+	})	
+})
+
+$('#paper2').on('click', function(event)
+{
+	players.child(2).update(
+	{
+		pick: 'paper'
+	})	
 })

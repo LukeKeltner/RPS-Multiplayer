@@ -13,6 +13,7 @@ firebase.initializeApp(config);
 var database = firebase.database()
 
 var numberOfPlayers = 0;
+var playerNumber = 0;
 var numberOfChats = 0;
 var playerName = "";
 var connectionsRef = database.ref("/connections");
@@ -22,10 +23,13 @@ var players = database.ref('players');
 
 connectedRef.on("value", function(snap) 
 {
+	console.log("console log of connections snap: "+snap)
+
 	if (snap.val())
 	{
 		var con = connectionsRef.push(true);
 		con.onDisconnect().remove();
+		console.log("Player "+playerNumber+" has disconnected")
 	}
 });
 
@@ -33,6 +37,11 @@ connectionsRef.on("value", function(snap)
 {
 	numberOfPlayers = snap.numChildren()
 	console.log(numberOfPlayers)
+
+	players.update(
+	{
+		numberOfConnections: numberOfPlayers
+	})
 });
 
 chats.on('value', function(snap)
@@ -42,7 +51,7 @@ chats.on('value', function(snap)
 
 players.on('value', function(snap)
 {
-	if (snap.numChildren() == 2)
+	if (snap.numChildren() === 3)
 	{
 		$('#pick-name').hide();
 		var player1Name = snap.val()[1].name;
@@ -52,14 +61,30 @@ players.on('value', function(snap)
 		$('#player1-name').html(player1Name);
 		$('#player2-name').html(player2Name);
 
-
-		if (snap.val()[1].pick!==undefined && snap.val()[2].pick!==undefined)
+		if (player1Pick === 'rock' || player1Pick === 'paper' || player1Pick === 'scissors')
 		{
+			$('#1-window').css('border', '4px solid lightgreen');
+			$('#player1-name').html(player1Name+" has picked!");
+			$('#choose-1').css('border', '4px solid lightgreen');
+		}
+
+		if (player2Pick === 'rock' || player2Pick === 'paper' || player2Pick === 'scissors')
+		{
+			$('#2-window').css('border', '4px solid lightgreen');
+			$('#player2-name').html(player2Name+" has picked!");
+			$('#choose-2').css('border', '4px solid lightgreen');
+		}
+
+
+		if (player1Pick!==undefined && player2Pick!==undefined && player1Pick!=='' && player2Pick!=='')
+		{
+			//If player 1 wins...
 			if ((player1Pick === 'rock' && player2Pick === 'scissors') || (player1Pick === 'paper' && player2Pick === 'rock') || (player1Pick === 'scissors' && player2Pick ==='paper'))
 			{
 				var totalWins = snap.val()[1].wins + 1;
 				var totalLosses = snap.val()[2].losses + 1;
 
+ 
 				players.child(1).update(
 				{
 					wins: totalWins,
@@ -71,17 +96,80 @@ players.on('value', function(snap)
 					losses: totalLosses,
 					pick: ''
 				})
+
+				$('#result').html(snap.val()[1].name+" Wins!")
+				$('#player1-stats').html("Wins: "+totalWins+", Losses: "+snap.val()[1].losses)
+				$('#player2-stats').html("Wins: "+snap.val()[2].wins+", Losses: "+totalLosses)
+
+				$('#1-window').css('border', '4px solid #eee');
+				$('#choose-1').css('border', '4px solid #eee');
+				$('#2-window').css('border', '4px solid #eee');
+				$('#choose-2').css('border', '4px solid #eee');
+			}
+
+			//If player 2 wins...
+			else if ((player2Pick === 'rock' && player1Pick === 'scissors') || (player2Pick === 'paper' && player1Pick === 'rock') || (player2Pick === 'scissors' && player1Pick ==='paper'))
+			{
+				var totalWins = snap.val()[2].wins + 1;
+				var totalLosses = snap.val()[1].losses + 1;
+
+				players.child(2).update(
+				{
+					wins: totalWins,
+					pick: ''
+				})
+
+				players.child(1).update(
+				{
+					losses: totalLosses,
+					pick: ''
+				})
+
+				$('#result').html(snap.val()[2].name+" Wins!")
+				$('#player1-stats').html("Wins: "+snap.val()[1].wins+", Losses: "+totalLosses)
+				$('#player2-stats').html("Wins: "+totalWins+", Losses: "+snap.val()[2].losses)
+
+				$('#1-window').css('border', '4px solid #eee');
+				$('#choose-1').css('border', '4px solid #eee');
+				$('#2-window').css('border', '4px solid #eee');
+				$('#choose-2').css('border', '4px solid #eee');
+			}
+
+			//If there is a tie
+			else if((player2Pick === 'rock' && player1Pick === 'rock') || (player2Pick === 'paper' && player1Pick === 'paper') || (player2Pick === 'scissors' && player1Pick ==='scissors'))
+			{
+
+				players.child(1).update(
+				{
+					pick: ''
+				})
+
+				players.child(2).update(
+				{
+					pick: ''
+				})
+
+				$('#result').html("Tie!")
+
+				$('#1-window').css('border', '4px solid #eee');
+				$('#choose-1').css('border', '4px solid #eee');
+				$('#2-window').css('border', '4px solid #eee');
+				$('#choose-2').css('border', '4px solid #eee');
 			}
 		}
-
-		console.log("Player 1 picked - "+snap.val()[1].pick)
 	}
+
+	console.log("Number of connections snap is: "+snap.val().numberOfConnections)
+
+	if (snap.val().numberOfConnections === 1)
+	{
+		console.log("Someone logged out!")
+/*		console.log("Player 1 is here: "+snap.hasChild('1'))
+		console.log("Player 2 is here: "+snap.hasChild('2'))*/
+		var whoIsIn = snap.val()
+	}
+
 })
-
-
-var player1LoggedIn = false;
-var player2LoggedIn = false;
-var playerNumber = 0;
 
 database.ref('numOfPlayers').once('value', function(snapshot)
 {
@@ -123,7 +211,49 @@ $('#create-player').on('click', function(event)
 {
 	playerName = $('#name').val().trim()
 
-	database.ref('players').child(playerNumber).set(
+	database.ref('players').once('value').then(function(snap)
+	{
+		console.log("1 exists: "+snap.hasChild('1'))//true is exists, false if not
+		console.log("2 exists: "+snap.hasChild('2'))//true is exists, false if not
+
+		if (!snap.hasChild('1'))
+		{
+			database.ref('players').child('1').set(
+			{
+				wins: 0,
+				losses: 0,
+				name: playerName
+			})
+
+			$('#chat').show()
+			$('#pick-name').hide()
+			$('#1-window').hide()
+			$('#choose-1').show()
+			$('#player1-name-choose').html(playerName)
+			$('#outcome').show()
+			$('#2-window').show()
+		}
+
+		else if (!snap.hasChild('2'))
+		{
+			database.ref('players').child('2').set(
+			{
+				wins: 0,
+				losses: 0,
+				name: playerName
+			})
+
+			$('#chat').show()
+			$('#pick-name').hide()
+			$('#2-window').hide()
+			$('#choose-2').show()
+			$('#player2-name-choose').html(playerName)
+			$('#outcome').show()
+			$('#1-window').show()
+		}
+	});
+
+/*	database.ref('players').child(playerNumber).set(
 	{
 		wins: 0,
 		losses: 0,
@@ -149,7 +279,7 @@ $('#create-player').on('click', function(event)
 		$('#player'+playerNumber+'-name-choose').html(playerName)
 		$('#outcome').show()
 		$('#1-window').show()
-	}
+	}*/
 })
 
 $('#send-chat').on('click', function(event)

@@ -32,6 +32,7 @@ var createMessage = function()
 connectedRef.on("value", function(snap) 
 {
 	console.log("console log of connections snap: "+snap)
+	console.log(snap.val())
 
 	if (snap.val())
 	{
@@ -41,11 +42,14 @@ connectedRef.on("value", function(snap)
 	}
 });
 
-player1DB.onDisconnect().remove();
-player2DB.onDisconnect().remove();
+	//ISSUE: With this, both players disconnect if one does.  Need to update.  
+	player1DB.onDisconnect().remove();
+	player2DB.onDisconnect().remove();
 
 connectionsRef.on("value", function(snap) 
 {
+	console.log("console log of connections snap!!!!!!!!!!!!!!!!!!!!!!: ")
+	console.log(snap.val())
 	numberOfPlayers = snap.numChildren()
 	console.log(numberOfPlayers)
 
@@ -109,6 +113,15 @@ players.on('value', function(snap)
 				})
 
 				$('#result').html(snap.val()[1].name+" Wins!")
+
+				$('#outcome').css('border', '4px solid blue')
+
+				setTimeout(function()
+				{ 
+					$('#outcome').css('border', '4px solid #eee')
+
+				}, 1000);
+
 				$('#player1-stats').html("Wins: "+totalWins+", Losses: "+snap.val()[1].losses)
 				$('#player2-stats').html("Wins: "+snap.val()[2].wins+", Losses: "+totalLosses)
 
@@ -137,6 +150,17 @@ players.on('value', function(snap)
 				})
 
 				$('#result').html(snap.val()[2].name+" Wins!")
+
+				$('#outcome').css('border', '4px solid blue')
+
+				setTimeout(function()
+				{ 
+					$('#outcome').css('border', '4px solid #eee')
+
+				}, 1000);
+
+
+
 				$('#player1-stats').html("Wins: "+snap.val()[1].wins+", Losses: "+totalLosses)
 				$('#player2-stats').html("Wins: "+totalWins+", Losses: "+snap.val()[2].losses)
 
@@ -161,6 +185,14 @@ players.on('value', function(snap)
 				})
 
 				$('#result').html("Tie!")
+
+				$('#outcome').css('border', '4px solid blue')
+
+				setTimeout(function()
+				{ 
+					$('#outcome').css('border', '4px solid #eee')
+
+				}, 1000);
 
 				$('#1-window').css('border', '4px solid #eee');
 				$('#choose-1').css('border', '4px solid #eee');
@@ -187,6 +219,7 @@ players.on('value', function(snap)
 database.ref('numOfPlayers').once('value', function(snapshot)
 {
 	//Player number is able to identify which player!!! (as long as no one disconnects...)
+	//...Later found a much better way to do this.
 	playerNumber = numberOfPlayers;
 	console.log("This is player "+playerNumber)
 
